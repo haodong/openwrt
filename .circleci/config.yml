@@ -1,0 +1,40 @@
+version: 2
+
+jobs:
+    build:
+        docker:
+            - image: ubuntu:bionic
+        steps:
+            - checkout
+            - run:
+                name: Preparing Environment
+                command: |
+                    apt-get update
+                    apt-get install subversion g++ zlib1g-dev build-essential git python rsync man-db libncurses5-dev gawk gettext unzip file libssl-dev wget zip time ca-certificates curl -y
+            - run:
+                name: Preparing OpenWrt
+                command: |
+                    mv ci.config .config
+                    mv ci.feeds.conf feeds.conf
+                    sed -i 's|\(KERNEL_PATCHVER:=\)4.14|\14.19|' target/linux/bcm53xx/Makefile
+                    sed -i 's|^TARGET_|# TARGET_|g; s|# TARGET_DEVICES += phicomm-k3|TARGET_DEVICES += phicomm-k3|' target/linux/bcm53xx/image/Makefile
+                    scripts/feeds update -a
+                    scripts/feeds install -a
+                    make download
+            - run:
+                    name: Building
+                    command: make V=s 2>&1
+            - run:
+                name: Preparing Hub
+                command: |
+                    HubVer=$(curl --silent https://api.github.com/repos/github/hub/releases/latest | grep tag_name | sed -E 's/.*"v([^"]+)".*/\1/')
+                    curl -fSLv https://github.com/github/hub/releases/download/v$HubVer/hub-linux-amd64-$HubVer.tgz | tar zxvf - hub-linux-amd64-$HubVer/bin/hub
+                    mv hub-linux-amd64-$HubVer/bin/hub /usr/local/bin/hub
+            - run:
+                name: Releasing
+                command: |
+                    ver=$(TZ=UTC-8 date +"%y%m%d-%H%M%S")
+                    trx=bin/targets/bcm53xx/generic/*-phicomm-k3-squashfs.trx
+                    ./qshell account $QAK $QSK $name
+                    ./qshell rput $BUCKET openwrt-phicomm-k3-by-haodong-v$ver.trx $trx
+                    hub release create v$ver -m v$ver -a $trx
