@@ -14,14 +14,14 @@ jobs:
             - run:
                 name: Preparing OpenWrt
                 command: |
-                    mv ci.config .config
-                    make defconfig
                     mv ci.feeds.conf feeds.conf
+                    scripts/feeds update -a
+                    scripts/feeds install -a
+                    mv ci.config .config
                     sed -i 's|partition@80000|partition@A0000|; s|0x0080000 0x0100000|0x00A0000 0x00E0000|' target/linux/bcm53xx/patches-4.19/322-ARM-dts-BCM5301X-Add-basic-DT-for-Phicomm-K3.patch
                     sed -i 's|\(KERNEL_PATCHVER:=\)4.14|\14.19|' target/linux/bcm53xx/Makefile
                     sed -i 's|^TARGET_|# TARGET_|g; s|# TARGET_DEVICES += phicomm-k3|TARGET_DEVICES += phicomm-k3|' target/linux/bcm53xx/image/Makefile
-                    scripts/feeds update -a
-                    scripts/feeds install -a
+                    make defconfig
                     make download
             - run:
                     name: Building
