@@ -116,8 +116,6 @@ define Device/asus_rt-acrh17
 	IMAGE_SIZE := 20439364
 	FILESYSTEMS := squashfs
 	UIMAGE_NAME:=$(shell echo -e '\03\01\01\01RT-AC82U')
-	KERNEL_INITRAMFS := $$(KERNEL) | uImage none
-	KERNEL_INITRAMFS_SUFFIX := -factory.trx
 	IMAGES := sysupgrade.bin
 	DEVICE_PACKAGES := ipq-wifi-rt-acrh17 ath10k-firmware-qca9984-ct kmod-ath10k-ct
 endef
