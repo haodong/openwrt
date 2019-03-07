@@ -1,12 +1,12 @@
 /* SPDX-License-Identifier: GPL-2.0-or-later OR MIT
  *
  * Copyright (c) 2018, Chen Minqiang <ptpt52@gmail.com>
+ * Copyright (c) 2019, Christian Lamparter <chunkeey@gmail.com>
  * Copyright (c) 2019, Hao Dong <halbertdong@gmail.com>
  *
  */
 
-#include "qcom-ipq4019-ap.dk04.1.dtsi"
-#include "qcom-ipq4019-bus.dtsi"
+#include "qcom-ipq4019.dtsi"
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/input/input.h>
 #include <dt-bindings/soc/qcom,tcsr.h>
@@ -28,8 +28,18 @@
 	};
 
 	soc {
-		spi_0: spi@78b5000 {
-			status = "disabled";
+		mdio@90000 {
+			status = "okay";
+		};
+
+		ess-psgmii@98000 {
+			status = "okay";
+		};
+
+		tcsr@1949000 {
+			compatible = "qcom,tcsr";
+			reg = <0x1949000 0x100>;
+			qcom,wifi_glb_cfg = <TCSR_WIFI_GLB_CFG>;
 		};
 
 		tcsr@194b000 {
@@ -46,53 +56,37 @@
 			qcom,ess-interface-select = <TCSR_ESS_PSGMII>;
 		};
 
-		tcsr@1949000 {
-			compatible = "qcom,tcsr";
-			reg = <0x1949000 0x100>;
-			qcom,wifi_glb_cfg = <TCSR_WIFI_GLB_CFG>;
-		};
-
 		tcsr@1957000 {
 			compatible = "qcom,tcsr";
 			reg = <0x1957000 0x100>;
 			qcom,wifi_noc_memtype_m0_m2 = <TCSR_WIFI_NOC_MEMTYPE_M0_M2>;
 		};
 
-		mdio@90000 {
-			status = "okay";
+		spi_0: spi@78b5000 {
+			status = "disabled";
+		};
+
+		wifi0: wifi@a000000 {
+			compatible = "qcom,ath10k";
+			status = "ok";
+			reg = <0x00010000 0 0 0 0>;
+			qcom,ath10k-calibration-variant = "ASUS-RT-ACRH17";
+		};
+
+		wifi1: wifi@a800000 {
+			status = "disabled";
 		};
 
 		ess-switch@c000000 {
 			status = "okay";
 		};
 
-		ess-psgmii@98000 {
-			status = "okay";
-		};
-
 		edma@c080000 {
 			status = "okay";
 		};
-
-		wifi0: wifi@a000000 {
-			status = "ok";
-			core-id = <0x0>;
-			qca,msi_addr = <0x0b006040>;
-			qca,msi_base = <0x40>;
-			wifi_led_num = <2>;         /* Wifi 2G */
-			wifi_led_source = <0>;      /* source id 0 */
-			qcom,mtd-name = "0:ART";
-			qcom,cal-offset = <0x1000>;
-			qcom,cal-len = <12064>;
-			qcom,ath10k-calibration-variant = "RT-ACRH17";
-		};
-
-		wifi1: wifi@a800000 {
-			status = "disabled";
-		};
 	};
 
-	gpio-keys {
+	keys {
 		compatible = "gpio-keys";
 
 		reset {
@@ -108,7 +102,7 @@
 		};
 	};
 
-	gpio-leds {
+	leds {
 		compatible = "gpio-leds";
 
 		power: status {
@@ -174,7 +168,7 @@
 				reg = <0x000000000000 0x000000400000>;
 				read-only;
 			};
-			partition@1 {
+			partition@0x400000 {
 				label = "UBI_DEV";
 				reg = <0x000000400000 0x000007C00000>;
 			};
@@ -209,17 +203,5 @@
 			 "gpio69";
 		function = "qpic";
 		bias-pull-down;
-	};
-};
-
-&i2c_0_pins {
-	pinmux {
-		function = "blsp_i2c0";
-		pins = "gpio10";
-	};
-	pinconf {
-		pins = "gpio10";
-		drive-strength = <16>;
-		bias-disable;
 	};
 };
