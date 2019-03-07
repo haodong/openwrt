@@ -111,6 +111,10 @@ case "$FIRMWARE" in
 		ln -sf /lib/firmware/ath10k/pre-cal-pci-0000\:00\:00.0.bin \
 			/lib/firmware/ath10k/QCA9888/hw2.0/board.bin
 		;;
+	asus,rt-acrh17)
+		CI_UBIPART=UBI_DEV
+		ath10kcal_ubi_extract "Factory" 36864 12064
+		;;
 	openmesh,a62)
 		ath10kcal_extract "0:ART" 36864 12064
 		;;
@@ -128,7 +132,8 @@ case "$FIRMWARE" in
 	asus,map-ac2200)
 		ath10kcal_ubi_extract "Factory" 4096 12064
 		;;
-	asus,rt-ac58u)
+	asus,rt-ac58u |\
+	asus,rt-acrh17)
 		CI_UBIPART=UBI_DEV
 		ath10kcal_ubi_extract "Factory" 4096 12064
 		;;
