@@ -62,19 +62,20 @@
 			qcom,wifi_noc_memtype_m0_m2 = <TCSR_WIFI_NOC_MEMTYPE_M0_M2>;
 		};
 
-		spi_0: spi@78b5000 {
-			status = "disabled";
+		usb2@60f8800 {
+			status = "okay";
 		};
 
-		wifi0: wifi@a000000 {
-			compatible = "qcom,ath10k";
-			status = "ok";
-			reg = <0x00010000 0 0 0 0>;
-			qcom,ath10k-calibration-variant = "ASUS-RT-ACRH17";
+		usb3@8af8800 {
+			status = "okay";
 		};
 
-		wifi1: wifi@a800000 {
-			status = "disabled";
+		crypto@8e3a000 {
+			status = "okay";
+		};
+
+		watchdog@b017000 {
+			status = "okay";
 		};
 
 		ess-switch@c000000 {
@@ -169,9 +170,36 @@
 				read-only;
 			};
 			partition@0x400000 {
-				label = "UBI_DEV";
+				label = "ubi";
 				reg = <0x000000400000 0x000007C00000>;
 			};
+		};
+	};
+};
+
+&tlmm {
+	serial_pins: serial_pinmux {
+		mux {
+			pins = "gpio16", "gpio17";
+			function = "blsp_uart0";
+			bias-disable;
+		};
+	};
+
+	nand_pins: nand_pins {
+		pullups {
+			pins =	"gpio53", "gpio58", "gpio59";
+			function = "qpic";
+			bias-pull-up;
+		};
+
+		pulldowns {
+			pins =	"gpio55", "gpio56", "gpio57",
+                "gpio60", "gpio62", "gpio63",
+                "gpio64", "gpio65", "gpio66",
+                "gpio67", "gpio69";
+			function = "qpic";
+			bias-pull-down;
 		};
 	};
 };
@@ -180,11 +208,36 @@
 	status = "okay";
 	perst-gpio = <&tlmm 38 GPIO_ACTIVE_LOW>;
 	wake-gpio = <&tlmm 50 GPIO_ACTIVE_LOW>;
-	clkreq-gpio = <&tlmm 39 GPIO_ACTIVE_LOW>;
+
+    bridge@0,0 {
+		reg = <0x00000000 0 0 0 0>;
+		#address-cells = <3>;
+		#size-cells = <2>;
+		ranges;
+
+		wifi2: wifi@1,0 {
+			compatible = "qcom,ath10k";
+			status = "okay";
+			reg = <0x00010000 0 0 0 0>;
+		};
+	};
+};
+
+&cryptobam {
+	status = "okay";
+};
+
+&blsp_dma {
+	status = "okay";
 };
 
 &qpic_bam {
 	status = "okay";
+};
+
+&wifi0 {
+	status = "okay";
+	qcom,ath10k-calibration-variant = "ASUS-RT-ACRH17";
 };
 
 &nand_pins {
